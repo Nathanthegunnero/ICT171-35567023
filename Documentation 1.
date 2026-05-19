@@ -1,1 +1,88 @@
+# Deployment Guide - Aus Weather Watch
 
+**Full step-by-step instructions for deploying the Aus Weather Watch website to an AWS EC2 cloud server.**
+
+This document records the complete process used to launch the cloud VM, install the web server, deploy the application, and make the site publicly accessible.
+
+## 1. AWS EC2 Instance Setup
+
+1. Log in to the [AWS Management Console](https://console.aws.amazon.com).
+2. Navigate to **EC2** → **Launch instance**.
+3. Configure the instance with the following settings:
+   - **Name**: `aus-weather-watch-vm`
+   - **AMI**: Ubuntu Server 24.04 LTS
+   - **Instance type**: `t2.micro` (Free tier eligible)
+   - **Key pair**: Create a new key pair (`aus-weather-key`) and download the `.pem` file
+   - **Security group**:
+     - Allow SSH (port 22) from Anywhere
+     - Allow HTTP (port 80) from Anywhere
+     - Allow HTTPS (port 443) from Anywhere
+4. Launch the instance and wait until status is **Running**.
+5. Allocate and associate an **Elastic IP** (so the public IP never changes when stopping/starting the instance).
+
+## 2. Connect to the Server (SSH)
+
+On your local machine, open PowerShell or Command Prompt and run:
+
+```powershell
+ssh -i "E:\aus-weather-key.pem" ubuntu@YOUR-ELASTIC-IP
+3. Install Nginx Web Server
+Bashsudo apt update && sudo apt upgrade -y
+sudo apt install nginx -y
+sudo systemctl enable --now nginx
+Verify Nginx is running:
+Bashsudo systemctl status nginx
+4. Deploy the Website
+Bashcd /var/www
+sudo rm -rf html
+sudo mkdir html
+cd html
+
+# Clone the GitHub repository
+sudo git clone https://github.com/Nathanthegunnero/ICT171-35567023.git .
+
+# Navigate into the project folder
+cd "Australian Weather Watch"
+
+# Install dependencies and build the React app
+npm install
+npm run build
+
+# Copy the built files to Nginx web directory
+cd ..
+sudo cp -r "Australian Weather Watch/dist/"* ./
+
+# Set correct permissions
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 755 /var/www/html
+
+# Restart Nginx
+sudo systemctl restart nginx
+5. Link Custom Domain (DNS)
+
+Log into your domain registrar (Namecheap, Cloudflare, etc.).
+Create an A record:
+Host: @
+Value: Your Elastic IP address
+
+(Optional but recommended) Create a www record pointing to the same Elastic IP.
+Wait for DNS propagation (usually 5–30 minutes).
+
+After propagation, the site will be accessible at http://yourdomain.com.
+6. Starting / Stopping the Server (Important for Credits)
+
+Stop the instance when not in use to save credits.
+Start the instance when needed.
+After starting, the Elastic IP remains the same — no reconfiguration is required.
+The website files and configuration are preserved on the EBS volume.
+
+7. Verify the Site
+
+Run curl ifconfig.me on the server to confirm the public IP.
+Open a browser and visit http://YOUR-ELASTIC-IP or http://yourdomain.com.
+
+The site should display the live Aus Weather Watch dashboard.
+
+Last updated: May 19th 2026
+Author: Nathan
+Project: ICT171 Assignment – Aus Weather Watch
