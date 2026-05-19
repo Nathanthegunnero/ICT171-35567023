@@ -20,8 +20,7 @@ Users can:
 
 ## 🚀 Live Demo
 
-**🌐 [https://your-domain.com](https://your-domain.com)**  
-*(Update this once you deploy to your cloud server)*
+**🌐 http://15.135.246.56)**
 
 ## 📹 Assignment Video Explainer
 
