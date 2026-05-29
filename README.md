@@ -40,8 +40,7 @@ Aus Weather Watch was built using Bolt.new (StackBlitz AI) and manually deployed
 
 ## 📂 Documentation
 
-- [Deployment Guide](docs/deployment.md)
-- [Architecture](docs/architecture.md)
+- [Deployment Guide](docs/Documentation 1)
 
 ## 🔧 Local Development
 
