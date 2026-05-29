@@ -1,58 +1,50 @@
 # Aus Weather Watch 🌦️🇦🇺
 
-**Real-time Australian Weather Tracker**  
+**Real-time Australian Weather Tracker**
+
 A clean, modern, responsive web application that provides live weather conditions, 7-day forecasts, and severe weather alerts for locations across Australia.
 
-![Aus Weather Watch Screenshot](screenshots/homepage.png)  
-*(Add a screenshot of your running site here later)*
+![Aus Weather Watch](screenshots/homepage.png)
+
+## 🚀 Live Site
+
+**🌐 https://ausweather.watch**
+
+## 📹 Project Video
+
+[▶ Watch Setup & Demo Video](https://youtu.be/YOUR_VIDEO_LINK)
 
 ## 🌟 Project Overview
 
-Aus Weather Watch was rapidly developed using **Bolt.new** (AI-powered development tool on StackBlitz).  
-It pulls real-time data directly from official Australian government sources — no paid APIs required.
+Aus Weather Watch was built using Bolt.new (StackBlitz AI) and manually deployed to an AWS EC2 cloud instance. The site pulls real-time data from official Australian Bureau of Meteorology sources.
 
-Users can:
-- Search any Australian city, suburb or postcode
-- View current temperature, "feels like", humidity, wind, UV, and rainfall
-- See a 7-day forecast
-- Receive severe weather alert banners
-- Browse major Australian cities with one click
-
-## 🚀 Live Demo
-
-**🌐 http://15.135.246.56)**
-
-## 📹 Assignment Video Explainer
-
-[▶ Watch the Setup & Demo Video](https://youtu.be/YOUR_VIDEO_LINK)  
-*(Link your recorded video here after you deploy the site to your cloud VM)*
+### Key Features
+- Search any Australian city or postcode
+- Current weather conditions with detailed information
+- 7-day forecast
+- Severe weather alerts
+- Responsive design (mobile friendly)
+- HTTPS secured with Let's Encrypt
 
 ## 🛠️ Tech Stack
 
-| Layer              | Technology                                      |
-|--------------------|-------------------------------------------------|
-| Framework          | React 18 + Vite                                 |
-| Styling            | Tailwind CSS                                    |
-| AI Builder         | Bolt.new (StackBlitz AI)                        |
-| Data Sources       | Bureau of Meteorology (BOM) public JSON feeds + Open-Meteo |
-| Hosting (Planned)  | Ubuntu 24.04 LTS + Nginx on cloud VM           |
-| Version Control    | Git + GitHub                                    |
+- **Frontend**: React + Vite + Tailwind CSS
+- **Hosting**: AWS EC2 (Ubuntu 24.04) + Nginx
+- **Domain**: ausweather.watch (Namecheap)
+- **SSL**: Let's Encrypt (Certbot)
+- **Version Control**: GitHub
 
 ## 📡 Data Sources
+- Bureau of Meteorology (BOM) public feeds
+- Open-Meteo API
 
-- Current observations and warnings → **Bureau of Meteorology (BOM)**
-- Forecasts → **Open-Meteo + BOM ACCESS-G model**
-- All data is free and publicly available
+## 📂 Documentation
 
-## 📂 Project Structure
-
-- `src/` — React components and logic
-- `public/` — Static assets
-- `screenshots/` — Project images (add later)
-- `scripts/` — Automation scripts (to be added during deployment)
+- [Deployment Guide](docs/deployment.md)
+- [Architecture](docs/architecture.md)
 
 ## 🔧 Local Development
 
 ```bash
 npm install
-npm run dev
+npm run build
