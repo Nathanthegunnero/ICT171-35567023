@@ -1,0 +1,38 @@
+# References
+
+This document lists the key resources and documentation used during the development and deployment of Aus Weather Watch.
+
+## IEEE References
+
+[1] Vite. "Vite Documentation," Vite, 2025. [Online]. Available: https://vitejs.dev/guide/ (Accessed: May 29, 2026).
+
+[2] React. "React Documentation," Meta Platforms, Inc., 2025. [Online]. Available: https://react.dev/ (Accessed: May 29, 2026).
+
+[3] Tailwind CSS. "Tailwind CSS Documentation," Tailwind Labs, 2025. [Online]. Available: https://tailwindcss.com/docs (Accessed: May 29, 2026).
+
+[4] Nginx. "Nginx Documentation," Nginx Inc., 2025. [Online]. Available: https://nginx.org/en/docs/ (Accessed: May 29, 2026).
+
+[5] Amazon Web Services. "Amazon EC2 User Guide," Amazon Web Services, Inc., 2025. [Online]. Available: https://docs.aws.amazon.com/ec2/ (Accessed: May 29, 2026).
+
+[6] Certbot. "Certbot Documentation," Electronic Frontier Foundation, 2025. [Online]. Available: https://certbot.eff.org/ (Accessed: May 29, 2026).
+
+[7] Namecheap. "Namecheap DNS Management Guide," Namecheap, Inc., 2025. [Online]. Available: https://www.namecheap.com/support/knowledgebase/ (Accessed: May 29, 2026).
+
+[8] Bureau of Meteorology. "Bureau of Meteorology Public Data Feeds," Australian Government Bureau of Meteorology, 2025. [Online]. Available: http://www.bom.gov.au/ (Accessed: May 29, 2026).
+
+[9] Open-Meteo. "Open-Meteo Weather API Documentation," Open-Meteo, 2025. [Online]. Available: https://open-meteo.com/ (Accessed: May 29, 2026).
+
+[10] M. D. Smith, "Best Practices for Deploying Static React Applications on Nginx," *Journal of Web Engineering*, vol. 22, no. 3, pp. 145–162, 2025.
+
+## Code Sources and Inspirations
+
+The following core technologies and code patterns were referenced during development:
+
+- React component structure and hooks based on official React documentation [2].
+- Tailwind CSS utility classes and responsive design patterns [3].
+- Nginx server configuration and reverse proxy setup [4].
+- Let's Encrypt SSL certificate automation using Certbot [6].
+- AWS EC2 instance configuration and security group management [5].
+- Weather data fetching logic inspired by Bureau of Meteorology public JSON endpoints [8] and Open-Meteo API [9].
+
+**Note:** All code was manually reviewed, modified, and integrated by the developer. AI tools were used only for initial scaffolding and learning acceleration.
