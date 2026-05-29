@@ -4,15 +4,13 @@
 
 A clean, modern, responsive web application that provides live weather conditions, 7-day forecasts, and severe weather alerts for locations across Australia.
 
-![Aus Weather Watch](screenshots/homepage.png)
-
 ## 🚀 Live Site
 
 **🌐 https://ausweather.watch**
 
 ## 📹 Project Video
 
-[▶ Watch Setup & Demo Video](https://youtu.be/YOUR_VIDEO_LINK)
+Included in submission.
 
 ## 🌟 Project Overview
 
