@@ -1,88 +1,453 @@
-# Deployment Guide - Aus Weather Watch
+# Aus Weather Watch
+## Cloud Computing Assignment Documentation
 
-**Full step-by-step instructions for deploying the Aus Weather Watch website to an AWS EC2 cloud server.**
+**Student:** Nathan  
+**Student ID:** 35567023  
+**Unit:** ICT171 Cloud Computing  
+**Date:** June 2026  
+**Live Site:** https://ausweather.watch  
+**Server IP:** 15.135.246.56 (AWS Elastic IP)
 
-This document records the complete process used to launch the cloud VM, install the web server, deploy the application, and make the site publicly accessible.
+---
 
-## 1. AWS EC2 Instance Setup
+## 1. Project Introduction
 
-1. Log in to the [AWS Management Console](https://console.aws.amazon.com).
-2. Navigate to **EC2** → **Launch instance**.
-3. Configure the instance with the following settings:
-   - **Name**: `aus-weather-watch-vm`
-   - **AMI**: Ubuntu Server 24.04 LTS
-   - **Instance type**: `t2.micro` (Free tier eligible)
-   - **Key pair**: Create a new key pair (`aus-weather-key`) and download the `.pem` file
-   - **Security group**:
-     - Allow SSH (port 22) from Anywhere
-     - Allow HTTP (port 80) from Anywhere
-     - Allow HTTPS (port 443) from Anywhere
-4. Launch the instance and wait until status is **Running**.
-5. Allocate and associate an **Elastic IP** (so the public IP never changes when stopping/starting the instance).
+Aus Weather Watch is a modern, responsive web application that delivers real-time weather information, forecasts, and severe weather alerts for locations across Australia. The project was developed as the major assessment for the ICT171 Cloud Computing unit.
 
-## 2. Connect to the Server (SSH)
+The primary goal was to move beyond theoretical concepts and demonstrate practical, end-to-end skills in cloud infrastructure provisioning (IaaS), Linux server administration, web server configuration, application deployment, DNS management, and secure public access (HTTPS). 
 
-On your local machine, open PowerShell or Command Prompt and run:
+The application is fully functional, publicly accessible, and secured with a custom domain and valid SSL certificate.
 
-```powershell
-ssh -i "E:\aus-weather-key.pem" ubuntu@YOUR-ELASTIC-IP
-3. Install Nginx Web Server
-Bashsudo apt update && sudo apt upgrade -y
-sudo apt install nginx -y
-sudo systemctl enable --now nginx
-Verify Nginx is running:
-Bashsudo systemctl status nginx
-4. Deploy the Website
-Bashcd /var/www
-sudo rm -rf html
-sudo mkdir html
-cd html
+---
 
-# Clone the GitHub repository
-sudo git clone https://github.com/Nathanthegunnero/ICT171-35567023.git .
+## 2. Objectives
 
-# Navigate into the project folder
-cd "Australian Weather Watch"
+The project was designed to achieve the following learning and practical objectives:
 
-# Install dependencies and build the React app
-npm install
-npm run build
+### Technical Objectives
+- Provision and manage a Linux virtual machine on Amazon Web Services (AWS EC2) using the Infrastructure-as-a-Service (IaaS) model.
+- Install, configure, and optimize a production web server (Nginx) for serving static single-page applications.
+- Deploy a modern frontend application (React + Vite) from source control to a live cloud environment.
+- Configure custom domain DNS records (A records) using a third-party registrar (Namecheap).
+- Implement and automate free SSL/TLS certificates using Let's Encrypt and Certbot, including auto-renewal.
+- Apply Linux security and permission best practices (file ownership, chmod, systemd service management).
 
-# Copy the built files to Nginx web directory
-cd ..
-sudo cp -r "Australian Weather Watch/dist/"* ./
+### Learning & Professional Development Objectives
+- Gain hands-on experience with real cloud provider consoles, SSH key-based authentication, security groups (virtual firewalls), and Elastic IPs for stable addressing.
+- Understand DNS propagation, common pitfalls (conflicting records, TTL), and how to troubleshoot them.
+- Develop systematic troubleshooting skills for common deployment issues (EACCES permissions, missing dependencies, 404 errors on SPAs, package manager errors).
+- Produce professional-grade technical documentation suitable for academic submission, future job applications, and portfolio use.
+- Align project work with long-term career goals in the Australian Defence Force (ADF) Cyber Warfare Officer role and subsequent Western Australian Government cyber/IT positions.
 
-# Set correct permissions
-sudo chown -R www-data:www-data /var/www/html
-sudo chmod -R 755 /var/www/html
+### Assignment-Specific Objectives
+- Demonstrate clear understanding of cloud architecture layers (client, web server, infrastructure, data).
+- Document the full design and deployment process with explanations, not just commands.
+- Show evidence of iterative problem-solving and learning from challenges encountered.
 
-# Restart Nginx
-sudo systemctl restart nginx
-5. Link Custom Domain (DNS)
+---
 
-Log into your domain registrar (Namecheap, Cloudflare, etc.).
-Create an A record:
-Host: @
-Value: Your Elastic IP address 
+## 3. System Overview
 
-(Optional but recommended) Create a www record pointing to the same Elastic IP.
-Wait for DNS propagation (usually 5–30 minutes).
+Aus Weather Watch follows a lightweight, secure, and cost-effective **static site architecture**. No persistent backend database or server-side application logic is required because weather data is fetched directly by the client browser from trusted public APIs.
 
-After propagation, the site will be accessible at http://yourdomain.com.
-6. Starting / Stopping the Server (Important for Credits)
+### High-Level Data Flow
+1. User opens https://ausweather.watch in any modern browser.
+2. DNS (Namecheap) resolves the domain to the AWS Elastic IP (15.135.246.56).
+3. Request hits the AWS Security Group (allows 80/443).
+4. Nginx receives the request, terminates SSL (if HTTPS), and serves the pre-built static files from `/var/www/html` (index.html + JS/CSS/assets).
+5. The React single-page application bootstraps in the browser.
+6. JavaScript code executes API calls (using `fetch()`) to public endpoints:
+   - Australian Bureau of Meteorology (BOM) JSON feeds for current observations and warnings.
+   - Open-Meteo API for 7-day forecasts (BOM ACCESS-G model).
+7. Data is processed client-side and rendered into responsive UI components (current conditions card, forecast grid, alert banners, location search).
 
-Stop the instance when not in use to save credits.
-Start the instance when needed.
-After starting, the Elastic IP remains the same — no reconfiguration is required.
-The website files and configuration are preserved on the EBS volume.
+**Benefits of this architecture:**
+- Extremely low operational cost (t2.micro free tier eligible + free SSL + low DNS cost).
+- High performance (CDN-like static file serving + browser caching).
+- Small attack surface (no backend runtime, no database, read-only static files).
+- Simple to deploy, version, and rollback (just replace dist/ contents).
+- Easy to scale horizontally later if traffic grows (multiple instances behind ALB).
 
-7. Verify the Site
+**Limitations / Scope Boundaries (acknowledged for assignment):**
+- No user accounts, personalization, or persistent storage.
+- No server-side rendering or API proxy (direct browser-to-API calls).
+- No automated CI/CD pipeline (manual SSH/git pull/build for this scope; could be added with GitHub Actions + CodeDeploy in future).
+- Basic security (no WAF, rate limiting, or advanced monitoring in current version).
 
-Run curl ifconfig.me on the server to confirm the public IP.
-Open a browser and visit http://YOUR-ELASTIC-IP or http://yourdomain.com.
+---
 
-The site should display the live Aus Weather Watch dashboard.
+## 4. Architecture
 
-Last updated: May 29th 2026
-Author: Nathan
-Project: ICT171 Assignment – Aus Weather Watch
+### 4.1 Conceptual Layers
+
+**Presentation / Client Layer**  
+React 18 single-page application running entirely in the user's browser. Responsible for UI rendering, state management (search input, weather data), and direct API consumption.
+
+**Web Server Layer**  
+Nginx (high-performance, event-driven web server). Configured as a simple static file server with gzip compression, security headers, and automatic HTTP → HTTPS redirect. Serves pre-built assets from `/var/www/html`.
+
+**Infrastructure Layer (AWS)**  
+- Virtual Private Cloud (default VPC)
+- EC2 t2.micro instance (Ubuntu 24.04)
+- Security Group (stateful firewall): inbound rules for SSH (22), HTTP (80), HTTPS (443)
+- Elastic IP (stable public address 15.135.246.56)
+- EBS gp3 root volume (persistent storage survives stop/start)
+
+**External Data Layer**  
+Public HTTPS APIs (no keys required for basic tier):
+- BOM: http://www.bom.gov.au/fwo/... JSON feeds
+- Open-Meteo: https://api.open-meteo.com/v1/forecast (BOM model)
+
+### 4.2 Architecture Diagram (Text + Mermaid)
+
+**Mermaid Diagram (copy to https://mermaid.live to generate image):**
+
+```mermaid
+flowchart TD
+    User[User Browser<br/>Desktop/Mobile] -->|HTTPS| DNS[DNS Resolution<br/>Namecheap]
+    DNS -->|A record| ElasticIP[Elastic IP<br/>15.135.246.56]
+    ElasticIP -->|Port 443| SG[Security Group<br/>Allow 80/443/22]
+    SG --> Nginx[Nginx Web Server<br/>SSL Termination]
+    Nginx -->|Static Files| Files[/var/www/html<br/>index.html + assets]
+    Files --> React[React SPA<br/>Client-side JS]
+    React -->|fetch JSON| BOM[BOM Public API]
+    React -->|fetch JSON| OpenMeteo[Open-Meteo API]
+    
+    style User fill:#e3f2fd
+    style Nginx fill:#fff3e0
+    style React fill:#e8f5e9
+```
+
+**Simplified Text Diagram:**
+
+```
+[Browser] 
+    ↓ HTTPS (DNS: ausweather.watch → 15.135.246.56)
+[AWS Security Group]
+    ↓
+[Nginx on EC2]  ← SSL termination, gzip, static serve
+    ↓
+[/var/www/html/dist]  ← Built React app (index.html, JS, CSS)
+    ↓ (Client-side execution)
+[External APIs: BOM + Open-Meteo]  ← No backend proxy needed
+```
+
+**Deployment Flow (Local → Production):**
+
+Local Dev / Bolt.new Preview → Git commit/push to GitHub → Server: git pull/clone → npm install → npm run build → copy dist/ to Nginx root → restart Nginx → DNS update (if needed) → HTTPS cert (first time or renew).
+
+---
+
+## 5. Component Configuration Details
+
+### 5.1 AWS Infrastructure
+- **AMI:** Ubuntu Server 24.04 LTS (HVM, SSD-backed)
+- **Instance Type:** t2.micro (burstable, free-tier eligible)
+- **Storage:** 8–10 GiB gp3 EBS root volume
+- **Networking:** Default VPC, public subnet, Elastic IP associated
+- **Security Group (Inbound):**
+  - 22/tcp (SSH) – Source: 0.0.0.0/0 (or restrict to home IP in production)
+  - 80/tcp (HTTP) – Source: 0.0.0.0/0
+  - 443/tcp (HTTPS) – Source: 0.0.0.0/0
+- **Key Pair:** RSA 2048-bit, .pem file stored securely on local machine (chmod 400)
+- **Elastic IP:** Allocated and associated for stable public endpoint (avoids changing IP on every stop/start)
+
+### 5.2 Nginx Web Server
+- Installed via apt from official Ubuntu repositories.
+- Main configuration: `/etc/nginx/nginx.conf` (global settings: worker processes, gzip, etc.).
+- Site configuration: Default server block or custom in `sites-available` (Certbot auto-updates for SSL).
+- Root directory: `/var/www/html` (standard Linux convention).
+- Index file: `index.html` (entry point of built React app).
+- SPA handling: `try_files $uri $uri/ /index.html;` (if client-side routing is added later).
+- Security headers added (X-Frame-Options, X-Content-Type-Options, etc.).
+- Certbot plugin automatically:
+  - Obtains Let's Encrypt certificate for ausweather.watch + www.
+  - Configures listen 443 ssl; ssl_certificate and ssl_certificate_key paths.
+  - Adds HTTP → HTTPS redirect on port 80.
+  - Sets up systemd timer for automatic renewal.
+
+### 5.3 Application (React + Vite)
+- Source code organized in the `Australian Weather Watch` subfolder of the repository.
+- Build output: `dist/` folder containing optimized, production-ready static assets.
+- No environment variables or secrets (all API endpoints are public).
+- Client-side data fetching with native `fetch()` + error handling + loading states.
+- Responsive design using Tailwind CSS utility classes (mobile-first).
+
+### 5.4 DNS Configuration (Namecheap)
+- Authoritative nameservers: Namecheap default (or Cloudflare if migrated later).
+- A records:
+  - Host: `@` (apex/root) → Value: `15.135.246.56` (Elastic IP), TTL: 5 min (during setup) → Auto
+  - Host: `www` → Value: `15.135.246.56`, TTL: 5 min
+- Old parking/redirect records removed to prevent conflicts.
+- Propagation monitored via dnschecker.org.
+
+### 5.5 SSL/TLS & Security
+- Certificate Authority: Let's Encrypt (free, automated, trusted by all modern browsers).
+- Tool: Certbot (official Let's Encrypt client) with `--nginx` plugin.
+- Certificate location: `/etc/letsencrypt/live/ausweather.watch/`
+- Auto-renewal: Enabled via systemd timer (`certbot renew` runs twice daily).
+- Protocol: TLS 1.2 / 1.3 enforced by Nginx + Certbot defaults.
+- HTTP Strict Transport Security (HSTS) can be added later for enhanced security.
+
+---
+
+## 6. Implementation Steps (Detailed with Explanations)
+
+The deployment was executed in logical phases. Each phase includes the rationale and key decisions.
+
+**Phase 1: Infrastructure Provisioning (AWS Console)**
+
+1. Created AWS account (free tier) and generated RSA key pair in the Sydney region (ap-southeast-2) for lower latency from Perth.
+2. Launched t2.micro Ubuntu 24.04 instance.
+3. Created Security Group with least-privilege inbound rules (SSH + web ports). Outbound left open for updates and API calls.
+4. Allocated Elastic IP and associated it to the instance. **Rationale:** Provides stable public IP for DNS A record. Without it, public IP changes on stop/start, breaking the domain.
+5. Added tag `Name = aus-weather-watch-vm` for easy identification.
+
+**Phase 2: Initial Server Hardening & Web Server Installation**
+
+1. Connected via SSH using the private key (`chmod 400` locally for security).
+2. Updated all packages (`apt update && apt upgrade`) to apply latest security patches.
+3. Installed essential tools: `nginx`, `git`, `curl`, `unzip`.
+4. Enabled and started Nginx via systemd.
+5. Verified with `systemctl status nginx` and `curl localhost`.
+
+**Explanation:** systemd is the modern Linux init system; `enable` ensures service survives reboots. Nginx was chosen over Apache for its superior static file performance and lower memory footprint.
+
+**Phase 3: Application Deployment**
+
+1. Cloned the GitHub repository into `/var/www/html` (standard web root).
+2. Navigated into the `Australian Weather Watch` subfolder (project structure from initial file upload).
+3. Fixed ownership (`chown -R ubuntu:ubuntu ...`) because sudo git created root-owned directories → EACCES error on npm install. This is a common Linux gotcha when mixing sudo and user tools.
+4. Ran `npm install` to fetch dependencies (React, Tailwind, etc.).
+5. Ran `npm run build` (Vite compiles, minifies, and outputs production bundle to `dist/`).
+6. Copied `dist/*` contents to parent `/var/www/html` so Nginx serves them at the domain root.
+7. Set ownership to `www-data:www-data` (Nginx worker user) and permissions 755/644.
+
+**Explanation:** Static files must be readable by the web server process. The chown step was repeated because earlier sudo operations left root ownership. Copying dist contents (instead of moving) keeps the source available for future rebuilds.
+
+**Phase 4: Web Server & Security Configuration**
+
+1. Reviewed default Nginx config; no major changes needed for simple static hosting.
+2. Installed Certbot and the Nginx plugin.
+3. Ran `sudo certbot --nginx` — it auto-detected the domain, obtained certificates for both apex and www, updated the server block with SSL directives, and configured the HTTP → HTTPS redirect.
+4. Verified certificates with `sudo certbot certificates`.
+5. Confirmed auto-renewal timer is active.
+
+**Explanation:** Certbot's Nginx plugin is the recommended path on Ubuntu — it handles config changes safely and sets up renewal. Manual cert management is error-prone and not scalable.
+
+**Phase 5: DNS & Domain Configuration (Namecheap)**
+
+1. Purchased `ausweather.watch` on Namecheap.
+2. Navigated to Advanced DNS.
+3. Removed default parking CNAME and URL redirect records (they were causing conflicts/404s).
+4. Added clean A records:
+   - `@` → 15.135.246.56
+   - `www` → 15.135.246.56
+5. Set low TTL (5 min) during initial testing for fast propagation feedback.
+6. Monitored with dnschecker.org until both records resolved globally to the Elastic IP.
+
+**Explanation:** Direct A records on the registrar's DNS is the simplest approach. No need for Cloudflare proxy (grey cloud) unless adding WAF/CDN features later. Removing parking records was critical — they were serving Namecheap's placeholder page instead of the deployed site.
+
+**Phase 6: Testing, Validation & Iteration**
+
+- Used browser dev tools (Network tab) to verify API calls and asset loading.
+- Tested on mobile viewport and multiple browsers.
+- Verified HTTPS padlock and certificate details.
+- Documented every error encountered and the exact fix applied (permission issues, wrong folder paths, missing packages, DNS conflicts). These real troubleshooting experiences are valuable evidence of learning.
+
+---
+
+## 7. Challenges Encountered & Solutions (Evidence of Learning)
+
+| Challenge | Root Cause | Solution Applied | Lesson Learned |
+|-----------|------------|------------------|---------------|
+| EACCES permission denied on `npm install` | Folder owned by root from `sudo git clone` | `sudo chown -R ubuntu:ubuntu "folder"` | Always manage ownership when mixing sudo and user-space tools (npm) |
+| `dist/*` not found after clone | `dist/` is in .gitignore (standard for Vite) and was never pushed | Build on the server itself (`npm run build`) | Git should contain source only; build artifacts generated in CI/CD or on server |
+| Messy folder structure after initial upload | Manual file upload via GitHub web UI created extra folders | Clean re-clone + careful `cp` of only dist contents | Prefer `git clone` over manual uploads for reproducibility |
+| Wrong `cd` command / stuck in `>` prompt | Typo in folder name + unclosed quote | `Ctrl+C` to cancel, then correct quoted path | Careful quoting for paths with spaces; Linux is case-sensitive |
+| `sudo` asking for password on fresh instance | AWS Ubuntu default is NOPASSWD, but state can change | `sudo passwd ubuntu` (set temp password) or fix sudoers | Understand sudoers configuration on cloud images |
+| 404 errors after deployment | Nginx root pointed to wrong location or dist not copied | Verified paths + `try_files` for SPA | Test thoroughly after every file operation |
+| DNS not resolving or showing parking page | Conflicting default records (CNAME/URL redirect) | Deleted parking records; added clean A records only | Always audit existing DNS records before adding new ones |
+
+These challenges were not obstacles but valuable learning experiences that deepened understanding of Linux permissions, DNS, deployment pipelines, and systematic debugging — skills directly transferable to professional cloud/devops/cyber roles.
+
+---
+
+## 8. Testing & Verification
+
+- **Functional:** Location search, current weather display, 7-day forecast, alert rendering all working on desktop and mobile.
+- **Security:** HTTPS enforced, valid Let's Encrypt certificate (padlock visible), no mixed content warnings.
+- **Performance:** Fast initial load (static files + gzip), responsive on 4G/mobile.
+- **DNS/Availability:** Confirmed via dnschecker.org (global resolution to Elastic IP) and direct browser tests from multiple networks.
+- **Reliability:** Instance can be stopped/started; Elastic IP persists; files survive restarts (EBS volume).
+
+---
+
+## 9. Future Enhancements & Lessons for Production
+
+- Add GitHub Actions CI/CD pipeline for automated build + deploy on push (eliminates manual SSH steps).
+- Implement rate limiting and basic WAF (Cloudflare free tier or AWS WAF).
+- Add monitoring/alerting (CloudWatch or Prometheus + Grafana).
+- Expand to include user accounts, saved locations, and push notifications (would require backend — e.g. AWS Lambda + DynamoDB or simple Node/Express API).
+- Infrastructure as Code (Terraform or AWS CDK) for reproducible environments.
+- Cost optimization: Use Spot instances or serverless options (Amplify, S3 + CloudFront) for even lower cost at scale.
+
+**Key Lesson:** Start simple (static site + IaaS), validate end-to-end, then layer on complexity. Documentation and systematic troubleshooting are as important as the code itself.
+
+---
+
+## 10. Conclusion
+
+This project successfully delivered a fully functional, publicly accessible, and secure cloud-hosted web application. Through hands-on work with AWS EC2, Nginx, DNS, SSL automation, and modern frontend tooling, I gained practical skills directly applicable to roles in cloud infrastructure, DevOps, and cyber security.
+
+All code, configuration, deployment steps, and this documentation are maintained in the public GitHub repository for transparency and future reference.
+
+The experience reinforced that cloud computing is not just about clicking buttons in a console — it requires understanding of Linux systems, networking fundamentals, security principles, and the discipline of clear documentation.
+
+---
+
+**Appendices**
+
+- **Appendix A:** Screenshots  
+  - AWS EC2 Instance details & Elastic IP  
+  - Security Group inbound rules  
+  - Terminal output: nginx status, certbot output, successful build  
+  - Browser screenshots: Desktop + mobile views of https://ausweather.watch  
+  - DNS checker results showing correct A record resolution  
+  - Namecheap Advanced DNS records (A records for @ and www)
+
+Appendix B
+
+-This appendix provides selected code examples from the Aus Weather Watch application to illustrate key implementation details. All code was written or significantly adapted by the developer.
+
+### C.1 Weather Data Fetch Function (Client-Side)
+
+```jsx
+// src/utils/weatherApi.js
+const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
+
+export async function fetchWeatherData(latitude, longitude) {
+  try {
+    const response = await fetch(
+      `${BASE_URL}?latitude=${latitude}&longitude=${longitude}` +
+      `&current=temperature_2m,relative_humidity_2m,apparent_temperature,` +
+      `precipitation,weather_code,wind_speed_10m&daily=weather_code,` +
+      `temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching weather data:', error);
+    throw error;
+  }
+}
+```
+
+**Explanation:**  
+This function uses the native `fetch` API to retrieve current weather and 7-day forecast data from Open-Meteo (which includes the BOM ACCESS-G model for Australia). It is called from React components when a user searches for a location. Error handling is included for robustness.
+
+### C.2 Weather Card Component (React)
+
+```jsx
+// src/components/WeatherCard.jsx
+import React from 'react';
+
+function WeatherCard({ weatherData }) {
+  if (!weatherData) return null;
+
+  const { current, daily } = weatherData;
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h2 className="text-3xl font-bold">{current.temperature_2m}°C</h2>
+          <p className="text-gray-600">Feels like {current.apparent_temperature}°C</p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Humidity</p>
+          <p className="font-semibold">{current.relative_humidity_2m}%</p>
+        </div>
+      </div>
+
+      <div className="border-t pt-4">
+        <h3 className="font-semibold mb-2">7-Day Forecast</h3>
+        <div className="grid grid-cols-7 gap-2 text-center text-sm">
+          {daily.time.map((date, index) => (
+            <div key={index} className="flex flex-col items-center">
+              <span className="text-xs text-gray-500">
+                {new Date(date).toLocaleDateString('en-AU', { weekday: 'short' })}
+              </span>
+              <span className="font-medium">{daily.temperature_2m_max[index]}°</span>
+              <span className="text-gray-500 text-xs">{daily.temperature_2m_min[index]}°</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default WeatherCard;
+```
+
+**Explanation:**  
+A reusable React component that displays current weather and a compact 7-day forecast. It receives data from the parent component after the API call completes. Tailwind CSS classes are used for responsive styling.
+
+### C.3 Location Search Component (Simplified)
+
+```jsx
+// src/components/LocationSearch.jsx
+import React, { useState } from 'react';
+
+function LocationSearch({ onSearch }) {
+  const [query, setQuery] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      onSearch(query.trim());
+      setQuery('');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search city or postcode (e.g. Perth, 6000)"
+        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        type="submit"
+        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+      >
+        Search
+      </button>
+    </form>
+  );
+}
+
+export default LocationSearch;
+```
+
+**Explanation:**  
+A controlled form component that captures user input and triggers a search. The parent component handles the actual API call using the query (which can be expanded with a geocoding step for city names to lat/long).
+
+
+- **Appendix C:** IEEE References (see separate refs.md)
+
+**Student Declaration**  
+I confirm that this project and documentation represent my own work. AI tools were used solely for initial UI scaffolding and learning support. All infrastructure provisioning, configuration, deployment, troubleshooting, and written documentation were completed independently.
+
+**Signed:** Nathan  
+**Date:** 4 June 2026
+
+---
