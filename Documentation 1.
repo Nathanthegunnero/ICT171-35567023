@@ -134,7 +134,7 @@ flowchart TD
 
 **Deployment Flow (Local → Production):**
 
-Local Dev / Bolt.new Preview → Git commit/push to GitHub → Server: git pull/clone → npm install → npm run build → copy dist/ to Nginx root → restart Nginx → DNS update (if needed) → HTTPS cert (first time or renew).
+Local Dev → Git commit/push to GitHub → Server: git pull/clone → npm install → npm run build → copy dist/ to Nginx root → restart Nginx → DNS update (if needed) → HTTPS cert (first time or renew).
 
 ---
 
@@ -263,12 +263,7 @@ The deployment was executed in logical phases. Each phase includes the rationale
 |-----------|------------|------------------|---------------|
 | EACCES permission denied on `npm install` | Folder owned by root from `sudo git clone` | `sudo chown -R ubuntu:ubuntu "folder"` | Always manage ownership when mixing sudo and user-space tools (npm) |
 | `dist/*` not found after clone | `dist/` is in .gitignore (standard for Vite) and was never pushed | Build on the server itself (`npm run build`) | Git should contain source only; build artifacts generated in CI/CD or on server |
-| Messy folder structure after initial upload | Manual file upload via GitHub web UI created extra folders | Clean re-clone + careful `cp` of only dist contents | Prefer `git clone` over manual uploads for reproducibility |
-| Wrong `cd` command / stuck in `>` prompt | Typo in folder name + unclosed quote | `Ctrl+C` to cancel, then correct quoted path | Careful quoting for paths with spaces; Linux is case-sensitive |
-| `sudo` asking for password on fresh instance | AWS Ubuntu default is NOPASSWD, but state can change | `sudo passwd ubuntu` (set temp password) or fix sudoers | Understand sudoers configuration on cloud images |
-| 404 errors after deployment | Nginx root pointed to wrong location or dist not copied | Verified paths + `try_files` for SPA | Test thoroughly after every file operation |
-| DNS not resolving or showing parking page | Conflicting default records (CNAME/URL redirect) | Deleted parking records; added clean A records only | Always audit existing DNS records before adding new ones |
-
+| Messy folder structure after initial upload | Manual file upload via GitHub web UI created extra folders | Clean re-clone + careful `cp` of only dist contents 
 These challenges were not obstacles but valuable learning experiences that deepened understanding of Linux permissions, DNS, deployment pipelines, and systematic debugging — skills directly transferable to professional cloud/devops/cyber roles.
 
 ---
