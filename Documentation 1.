@@ -308,15 +308,7 @@ The experience reinforced that cloud computing is not just about clicking button
 
 **Appendices**
 
-- **Appendix A:** Screenshots  
-  - AWS EC2 Instance details & Elastic IP  
-  - Security Group inbound rules  
-  - Terminal output: nginx status, certbot output, successful build  
-  - Browser screenshots: Desktop + mobile views of https://ausweather.watch  
-  - DNS checker results showing correct A record resolution  
-  - Namecheap Advanced DNS records (A records for @ and www)
-
-Appendix B
+Appendix A
 
 -This appendix provides selected code examples from the Aus Weather Watch application to illustrate key implementation details. All code was written or significantly adapted by the developer.
 
@@ -442,7 +434,7 @@ export default LocationSearch;
 A controlled form component that captures user input and triggers a search. The parent component handles the actual API call using the query (which can be expanded with a geocoding step for city names to lat/long).
 
 
-- **Appendix C:** IEEE References (see separate refs.md)
+- **Appendix B:** IEEE References (see separate refs.md)
 
 **Student Declaration**  
 I confirm that this project and documentation represent my own work. AI tools were used solely for initial UI scaffolding and learning support. All infrastructure provisioning, configuration, deployment, troubleshooting, and written documentation were completed independently.
